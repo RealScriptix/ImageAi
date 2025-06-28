@@ -3,170 +3,269 @@
 <head>
   <meta charset="UTF-8">
   <title>Ultimage AI Generator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; }
+    :root {
+      --bg-dark: #17181A;
+      --bg-light: #F5F5F5;
+      --fg-dark: #EEE;
+      --fg-light: #222;
+      --accent: #4A90E2;
+    }
     body {
-      margin: 0; padding: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #0f0c29;
-      color: white;
-      transition: background 0.3s, color 0.3s;
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-dark);
+      color: var(--fg-dark);
+      transition: all .3s;
     }
-    .light {
-      background: #f5f5f5;
-      color: #111;
+    body.light {
+      background: var(--bg-light);
+      color: var(--fg-light);
     }
-    .container {
-      max-width: 800px;
-      margin: auto;
-      padding: 2rem;
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: var(--accent);
+      color: #fff;
     }
-    h1 {
-      text-align: center;
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
+    header h1 {
+      font-size: 1.5rem;
+      margin: 0;
     }
-    input, button {
-      padding: 10px;
+    header nav > button {
+      margin-left: 1rem;
+      background: transparent;
       border: none;
-      margin: 0.3rem 0;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    main { padding: 2rem; max-width: 900px; margin: auto; }
+    .view { display: none; }
+    .view.active { display: block; }
+    input, button, textarea {
       width: 100%;
+      max-width: 500px;
+      padding: 0.8rem;
+      margin: 0.6rem 0;
       border-radius: 5px;
+      border: 1px solid #ccc;
       font-size: 1rem;
     }
-    #output img {
-      width: 100%;
-      max-height: 400px;
-      object-fit: cover;
-      border-radius: 10px;
-      margin-top: 1rem;
-    }
-    #settings {
-      display: none;
-      margin-top: 1rem;
-      background: rgba(255,255,255,0.05);
-      padding: 1rem;
-      border-radius: 10px;
-    }
-    ul { list-style: none; padding: 0; }
-    li { margin: 4px 0; }
-    .hidden { display: none; }
-    .prompt-history {
-      background: rgba(255,255,255,0.03);
+    button { background: var(--accent); color: #fff; border: none; cursor: pointer; }
+    button:disabled { background: #aaa; cursor: not-allowed; }
+    .history-item {
       padding: 0.5rem;
-      border-radius: 5px;
+      background: rgba(0,0,0,0.1);
+      margin: 0.4rem 0;
+      border-radius: 4px;
     }
+    #output img {
+      width: 100%; max-height: 400px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-top: 1rem;
+    }
+    /* Loading spinner */
+    .spinner {
+      border: 4px solid rgba(0,0,0,0.1);
+      border-top: 4px solid var(--accent);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0); }
+      100% { transform: rotate(360deg); }
+    }
+    iframe { display: none; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Ultimage AI Generator</h1>
+  <header>
+    <h1>Ultimage AI</h1>
+    <nav>
+      <button onclick="showView('home')">Home</button>
+      <button onclick="showView('generator')">Generator</button>
+      <button onclick="showView('settings')">Settings</button>
+      <button onclick="showView('auth')"><span id="authBtn">Login</span></button>
+    </nav>
+  </header>
 
-    <div id="loginArea">
-      <input id="loginUser" placeholder="Username">
-      <input id="loginPass" type="password" placeholder="Password">
-      <button onclick="login()">Login / Signup</button>
-    </div>
+  <main>
+    <!-- HOME VIEW -->
+    <section id="home" class="view active">
+      <h2>Welcome to Ultimage AI</h2>
+      <p>Generate amazing AI images with just a prompt. Try <strong>3 free generations</strong>—no login required!</p>
+      <button onclick="showView('generator')">Try Now</button>
+    </section>
 
-    <div id="mainArea" class="hidden">
-      <input id="promptInput" placeholder="Enter your prompt...">
-      <button onclick="generateImage()">Generate Image</button>
+    <!-- GENERATOR VIEW -->
+    <section id="generator" class="view">
+      <h2>AI Image Generator</h2>
+      <textarea id="promptInput" placeholder="Describe your image..."></textarea>
+      <button id="genBtn" onclick="generateImage()">Generate</button>
+      <div id="status"></div>
       <div id="output"></div>
-
       <h3>Prompt History</h3>
-      <div class="prompt-history">
-        <ul id="history"></ul>
-      </div>
+      <div id="historyList"></div>
+    </section>
 
-      <h3>Settings</h3>
-      <button onclick="toggleSettings()">Toggle Settings</button>
-      <div id="settings">
-        <button onclick="toggleTheme()">Toggle Light/Dark</button><br>
-        <button onclick="clearHistory()">Clear History</button><br>
+    <!-- AUTH VIEW -->
+    <section id="auth" class="view">
+      <h2 id="authTitle">Login</h2>
+      <input id="userName" placeholder="Username">
+      <input id="userPass" type="password" placeholder="Password">
+      <button onclick="authAction()">Submit</button>
+      <p id="authToggleLine">Don’t have an account? <a href="#" onclick="toggleAuth()">Sign up</a></p>
+    </section>
+
+    <!-- SETTINGS VIEW -->
+    <section id="settings" class="view">
+      <h2>Settings</h2>
+      <button onclick="toggleTheme()">Toggle Light/Dark</button>
+      <div>
+        <h3>Your API Key</h3>
+        <p id="apiKey"></p>
         <button onclick="generateAPI()">Generate API Key</button>
-        <p id="apiDisplay"></p>
       </div>
-    </div>
-  </div>
+      <div>
+        <h3>Clear All Data</h3>
+        <button onclick="clearAll()">Clear Data & History</button>
+      </div>
+    </section>
+  </main>
 
-  <!-- Hidden Perchance AI iframe -->
-  <iframe id="perchanceFrame" src="https://perchance.org/ai-text-to-image-generator" style="width:0;height:0;border:none;"></iframe>
+  <iframe id="perchance" src="https://perchance.org/ai-text-to-image-generator"></iframe>
 
   <script>
-    let theme = 'dark';
+    // State
+    let view = 'home';
+    let freeUses = 3;
     let currentUser = null;
     const historyKey = 'ultimage-history';
+    const themeKey = 'ultimage-theme';
 
-    function login() {
-      const user = document.getElementById('loginUser').value.trim();
-      const pass = document.getElementById('loginPass').value;
-      if (!user || !pass) return alert('Enter both username and password.');
-      currentUser = user;
-      document.getElementById('loginArea').style.display = 'none';
-      document.getElementById('mainArea').classList.remove('hidden');
-      loadHistory();
-      loadAPI();
+    // On load
+    loadTheme();
+    initAuth();
+
+    function showView(v) {
+      document.querySelectorAll('.view').forEach(s => s.classList.remove('active'));
+      document.getElementById(v).classList.add('active');
+      view = v;
+      if (v === 'generator') loadHistory();
+      if (v === 'settings') showAPI();
+      updateAuthBtn();
     }
 
+    function updateAuthBtn() {
+      document.getElementById('authBtn').textContent = currentUser ? currentUser : 'Login';
+    }
+
+    // AUTH
+    function initAuth() {
+      let saved = localStorage.getItem('ultimage-user');
+      if (saved) currentUser = saved;
+      updateAuthBtn();
+    }
+    function authAction() {
+      const u = document.getElementById('userName').value.trim();
+      const p = document.getElementById('userPass').value;
+      if (!u || !p) return alert('Enter username & password');
+      currentUser = u;
+      localStorage.setItem('ultimage-user', u);
+      freeUses = 0;
+      showView('generator');
+    }
+    function toggleAuth() {
+      const isLogin = document.getElementById('authTitle').textContent === 'Login';
+      document.getElementById('authTitle').textContent = isLogin ? 'Sign Up' : 'Login';
+      document.getElementById('authToggleLine').innerHTML = isLogin ?
+        `Already have one? <a href="#" onclick="toggleAuth()">Login</a>` :
+        `Don’t have one? <a href="#" onclick="toggleAuth()">Sign up</a>`;
+    }
+
+    // GENERATION
     function generateImage() {
+      if (!currentUser && freeUses <= 0) {
+        alert('Login to generate more.');
+        return;
+      }
       const prompt = document.getElementById('promptInput').value.trim();
       if (!prompt) return;
-      const frame = document.getElementById('perchanceFrame').contentWindow;
-      frame.postMessage({ prompt }, "*");
-      savePrompt(prompt);
-      updateHistoryUI(prompt);
-      const imgURL = `https://api.dicebear.com/8.x/shapes/svg?seed=${encodeURIComponent(prompt)}`;
-      document.getElementById("output").innerHTML = `<img src="${imgURL}" alt="Generated Image">`;
+      disableGen(true);
+      setStatus('Generating...');
+      const frame = document.getElementById('perchance').contentWindow;
+      frame.postMessage({ prompt }, '*');
+      setTimeout(() => {
+        const url = `https://api.dicebear.com/8.x/shapes/svg?seed=${encodeURIComponent(prompt)}`;
+        document.getElementById('output').innerHTML = `<img src="${url}">`;
+        saveHistory(prompt);
+        loadHistory();
+        if (!currentUser) freeUses--;
+        disableGen(false);
+        setStatus('');
+      }, 1200);
+    }
+    function disableGen(off) {
+      document.getElementById('genBtn').disabled = off;
+      document.getElementById('promptInput').disabled = off;
+    }
+    function setStatus(txt) {
+      document.getElementById('status').innerHTML = txt ? `<div class="spinner"></div><p>${txt}</p>` : '';
     }
 
-    function savePrompt(prompt) {
-      let data = JSON.parse(localStorage.getItem(historyKey) || "{}");
-      if (!data[currentUser]) data[currentUser] = [];
-      data[currentUser].push(prompt);
+    // HISTORY
+    function saveHistory(prompt) {
+      const data = JSON.parse(localStorage.getItem(historyKey) || '{}');
+      const key = currentUser || '_guest';
+      if (!data[key]) data[key] = [];
+      data[key].push({ prompt, date: new Date().toLocaleString() });
       localStorage.setItem(historyKey, JSON.stringify(data));
     }
-
-    function updateHistoryUI(prompt) {
-      const li = document.createElement("li");
-      li.textContent = prompt;
-      document.getElementById("history").appendChild(li);
-    }
-
     function loadHistory() {
-      const ul = document.getElementById("history");
-      ul.innerHTML = "";
-      const data = JSON.parse(localStorage.getItem(historyKey) || "{}");
-      (data[currentUser] || []).forEach(p => updateHistoryUI(p));
+      const list = document.getElementById('historyList');
+      list.innerHTML = '';
+      const data = JSON.parse(localStorage.getItem(historyKey) || '{}');
+      const arr = data[currentUser] || data['_guest'] || [];
+      arr.slice().reverse().forEach(it => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        div.innerText = `${it.date} — ${it.prompt}`;
+        list.appendChild(div);
+      });
     }
 
-    function toggleSettings() {
-      const el = document.getElementById("settings");
-      el.style.display = el.style.display === 'none' ? 'block' : 'none';
-    }
-
+    // SETTINGS
     function toggleTheme() {
-      const body = document.body;
-      body.classList.toggle('light');
-      theme = body.classList.contains('light') ? 'light' : 'dark';
+      document.body.classList.toggle('light');
+      localStorage.setItem(themeKey, document.body.classList.contains('light') ? 'light' : 'dark');
     }
-
-    function clearHistory() {
-      localStorage.removeItem(historyKey);
-      document.getElementById("history").innerHTML = "";
+    function loadTheme() {
+      if (localStorage.getItem(themeKey) === 'light') document.body.classList.add('light');
     }
-
     function generateAPI() {
-      const key = 'IMG-' + Math.random().toString(36).substring(2, 14).toUpperCase();
-      localStorage.setItem("ultimage-api-" + currentUser, key);
-      document.getElementById("apiDisplay").textContent = "API Key: " + key;
+      const key = 'IMG-' + Math.random().toString(36).substring(2,14).toUpperCase();
+      localStorage.setItem('ultimage-api', key);
+      showAPI();
     }
-
-    function loadAPI() {
-      const key = localStorage.getItem("ultimage-api-" + currentUser);
-      if (key) {
-        document.getElementById("apiDisplay").textContent = "API Key: " + key;
-      }
+    function showAPI() {
+      document.getElementById('apiKey').innerText = localStorage.getItem('ultimage-api') || '(not yet generated)';
+    }
+    function clearAll() {
+      if (!confirm('Clear all prompts, login, and API key?')) return;
+      localStorage.removeItem('ultimage-user');
+      localStorage.removeItem(themeKey);
+      localStorage.removeItem(historyKey);
+      localStorage.removeItem('ultimage-api');
+      location.reload();
     }
   </script>
 </body>
