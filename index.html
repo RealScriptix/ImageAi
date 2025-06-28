@@ -1,89 +1,294 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Ultimage AI Generator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Inter', sans-serif;
-      background: #0b0b11;
-      color: #d0d8f0;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ultimage AI Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  /* EXE6 inspired dark theme with glass blur and neon glow */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0; padding: 0;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #0d0d18, #121224);
+    color: #cdd9f1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    padding: 1rem 2rem;
+    background: rgba(16,16,32,0.8);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 20px #4a90e2aa;
+    text-align: center;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    font-size: 1.5rem;
+    color: #78aaff;
+    text-transform: uppercase;
+    user-select: none;
+  }
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 1rem 2rem;
+  }
+  .container {
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    box-shadow: 0 0 30px #4a90e2aa;
+    max-width: 640px;
+    width: 100%;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+  }
+  textarea {
+    width: 100%;
+    border-radius: 12px;
+    border: none;
+    background: rgba(0,0,0,0.3);
+    color: #cdd9f1;
+    font-size: 1.1rem;
+    padding: 1rem;
+    resize: vertical;
+    min-height: 100px;
+    transition: background 0.3s ease;
+  }
+  textarea:focus {
+    outline: none;
+    background: rgba(0,0,0,0.5);
+  }
+  label {
+    margin-top: 1rem;
+    font-weight: 600;
+    color: #89aaffcc;
+    font-size: 0.9rem;
+  }
+  select, input[type="number"] {
+    width: 100%;
+    margin-top: 0.25rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: none;
+    background: rgba(0,0,0,0.3);
+    color: #cdd9f1;
+    font-size: 1rem;
+  }
+  select:focus, input[type="number"]:focus {
+    outline: none;
+    background: rgba(0,0,0,0.5);
+  }
+  button {
+    margin-top: 1.5rem;
+    background: #4a90e2;
+    border: none;
+    padding: 1rem;
+    border-radius: 16px;
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.15s ease;
+    user-select: none;
+  }
+  button:hover:not(:disabled) {
+    background: #73a9ff;
+    transform: scale(1.05);
+  }
+  button:disabled {
+    background: #3a65a0;
+    cursor: not-allowed;
+  }
+  #status {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    text-align: center;
+    min-height: 1.2em;
+    color: #89aaffcc;
+  }
+  #imageResult {
+    margin-top: 2rem;
+    text-align: center;
+  }
+  #imageResult img {
+    max-width: 100%;
+    border-radius: 14px;
+    box-shadow: 0 0 30px #4a90e2aa;
+    animation: fadeIn 0.8s ease forwards;
+    opacity: 0;
+  }
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+  .history {
+    margin-top: 2rem;
+  }
+  .history h3 {
+    margin-bottom: 0.5rem;
+    color: #7ba8ff;
+  }
+  .history-list {
+    list-style: none;
+    padding-left: 0;
+    max-height: 180px;
+    overflow-y: auto;
+  }
+  .history-list li {
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: background 0.2s ease;
+  }
+  .history-list li:hover {
+    background: #4a90e2aa;
+  }
+  footer {
+    text-align: center;
+    padding: 1rem;
+    font-size: 0.8rem;
+    color: #555a80;
+    user-select: none;
+  }
+  @media(max-width: 480px) {
+    .container {
+      padding: 1.2rem;
     }
-
-    header {
-      background: #13131d;
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid rgba(100,100,255,0.1);
-      box-shadow: 0 0 10px rgba(100,100,255,0.15);
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 1.4rem;
-      color: #7bb0ff;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-
-    main {
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    iframe {
-      flex-grow: 1;
-      width: 100%;
-      border: none;
-      background: #0b0b11;
-      filter: drop-shadow(0 0 15px rgba(100,150,255,0.2));
-    }
-
-    footer {
+    button {
+      font-size: 1rem;
       padding: 0.8rem;
-      text-align: center;
-      font-size: 0.8rem;
-      color: #555;
-      background: #10101a;
-      border-top: 1px solid rgba(100,100,255,0.05);
     }
-
-    .glass {
-      backdrop-filter: blur(10px);
-      background: rgba(255,255,255,0.03);
-      border-radius: 12px;
-      box-shadow: inset 0 0 15px rgba(100,150,255,0.1);
-      padding: 0.5rem 1rem;
-    }
-
-    @media (max-width: 600px) {
-      header h1 {
-        font-size: 1rem;
-      }
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
-  <header>
-    <h1>Ultimage AI Generator</h1>
-    <div class="glass">Powered by Perchance</div>
-  </header>
-  <main>
-    <iframe src="https://perchance.org/ai-text-to-image-generator"></iframe>
-  </main>
-  <footer>
-    &copy; 2025 Ultimage | AI powered by <a href="https://perchance.org/" target="_blank" style="color:#7bb0ff;">Perchance</a>
-  </footer>
+<header>Ultimage AI Generator</header>
+<main>
+  <div class="container">
+    <textarea id="prompt" placeholder="Enter your image prompt here..."></textarea>
+
+    <label for="width">Width (px):</label>
+    <select id="width" aria-label="Width">
+      <option value="256">256</option>
+      <option value="512" selected>512</option>
+      <option value="768">768</option>
+    </select>
+
+    <label for="height">Height (px):</label>
+    <select id="height" aria-label="Height">
+      <option value="256">256</option>
+      <option value="512" selected>512</option>
+      <option value="768">768</option>
+    </select>
+
+    <label for="steps">Sampling Steps:</label>
+    <input type="number" id="steps" min="10" max="50" value="25" />
+
+    <button id="generateBtn" onclick="generateImage()">Generate Image</button>
+
+    <div id="status"></div>
+    <div id="imageResult"></div>
+
+    <div class="history">
+      <h3>Prompt History</h3>
+      <ul class="history-list" id="historyList"></ul>
+    </div>
+  </div>
+</main>
+<footer>
+  Powered by Stable Diffusion - <a href="https://huggingface.co/spaces/prompthero/openjourney" target="_blank" style="color:#7ba8ff;">OpenJourney</a>
+</footer>
+
+<script>
+  const promptInput = document.getElementById('prompt');
+  const widthSelect = document.getElementById('width');
+  const heightSelect = document.getElementById('height');
+  const stepsInput = document.getElementById('steps');
+  const generateBtn = document.getElementById('generateBtn');
+  const statusDiv = document.getElementById('status');
+  const imageResult = document.getElementById('imageResult');
+  const historyList = document.getElementById('historyList');
+
+  const HISTORY_KEY = 'ultimage_prompt_history';
+
+  // Load history from localStorage
+  let promptHistory = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+  renderHistory();
+
+  function renderHistory() {
+    historyList.innerHTML = '';
+    promptHistory.forEach((p, i) => {
+      const li = document.createElement('li');
+      li.textContent = p;
+      li.title = 'Click to reuse prompt';
+      li.onclick = () => {
+        promptInput.value = p;
+        imageResult.innerHTML = '';
+        statusDiv.textContent = '';
+      };
+      historyList.appendChild(li);
+    });
+  }
+
+  function savePromptToHistory(prompt) {
+    if (!prompt) return;
+    promptHistory = promptHistory.filter(p => p !== prompt);
+    promptHistory.unshift(prompt);
+    if (promptHistory.length > 20) promptHistory.pop();
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(promptHistory));
+    renderHistory();
+  }
+
+  async function generateImage() {
+    const prompt = promptInput.value.trim();
+    if (!prompt) {
+      alert('Please enter a prompt!');
+      return;
+    }
+
+    const width = parseInt(widthSelect.value);
+    const height = parseInt(heightSelect.value);
+    const steps = parseInt(stepsInput.value);
+
+    generateBtn.disabled = true;
+    statusDiv.textContent = 'Generating image... This may take up to 30 seconds.';
+    imageResult.innerHTML = '';
+
+    try {
+      // Use HuggingFace Space for openjourney (Stable Diffusion)
+      const response = await fetch('https://hf.space/embed/prompthero/openjourney/+/api/predict/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          data: [prompt, width, height, steps]
+        })
+      });
+
+      const result = await response.json();
+      const imageUrl = result?.data?.[0];
+
+      if (imageUrl) {
+        imageResult.innerHTML = `<img src="${imageUrl}" alt="Generated Image" />`;
+        statusDiv.textContent = '';
+        savePromptToHistory(prompt);
+      } else {
+        statusDiv.textContent = 'Failed to generate image.';
+      }
+    } catch (e) {
+      console.error(e);
+      statusDiv.textContent = 'Error during generation. Try again later.';
+    } finally {
+      generateBtn.disabled = false;
+    }
+  }
+</script>
 </body>
 </html>
