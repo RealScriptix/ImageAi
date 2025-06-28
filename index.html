@@ -1,310 +1,74 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ultimage AI Generator — EXE6 Style</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8">
+  <title>Ultimage AI Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    /* ===== Reset & Base ===== */
-    *, *::before, *::after {
-      box-sizing: border-box;
-    }
     body {
       margin: 0;
       font-family: 'Inter', sans-serif;
-      background: #0a0a0f;
-      color: #cdd6f4;
-      user-select: none;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+      background: #0b0b11;
+      color: #d0d8f0;
+      display: flex;
+      flex-direction: column;
       height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow-x: hidden;
-    }
-    /* ===== Glassmorphism Container ===== */
-    #app {
-      flex: 1 1 auto;
-      max-width: 900px;
-      margin: 2rem auto;
-      background: rgba(15,15,23,0.7);
-      border-radius: 20px;
-      box-shadow:
-        0 0 30px rgba(74,144,226,0.3),
-        inset 0 0 20px rgba(74,144,226,0.15);
-      backdrop-filter: blur(20px);
-      padding: 2rem 2.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
-      border: 1px solid rgba(74,144,226,0.6);
       overflow: hidden;
     }
-    /* ===== Header/Nav ===== */
+
     header {
+      background: #13131d;
+      padding: 1rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1rem 2rem;
-      background: #07070c;
-      border-bottom: 1px solid rgba(74,144,226,0.5);
-      box-shadow:
-        0 0 10px rgba(74,144,226,0.4);
+      border-bottom: 1px solid rgba(100,100,255,0.1);
+      box-shadow: 0 0 10px rgba(100,100,255,0.15);
     }
+
     header h1 {
-      font-weight: 700;
-      font-size: 1.8rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: #58a6ff;
-      user-select: none;
       margin: 0;
-    }
-    nav button {
-      background: none;
-      border: none;
-      color: #7fb0ff;
-      font-weight: 600;
-      font-size: 1rem;
-      margin-left: 1.6rem;
-      cursor: pointer;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      transition:
-        color 0.3s ease,
-        background-color 0.3s ease,
-        box-shadow 0.3s ease;
+      font-size: 1.4rem;
+      color: #7bb0ff;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      user-select: none;
     }
-    nav button:hover, nav button.active {
-      color: #e0e7ff;
-      background-color: rgba(74,144,226,0.2);
-      box-shadow:
-        0 0 10px rgba(74,144,226,0.7);
-    }
-    nav button:focus-visible {
-      outline-offset: 3px;
-      outline: 2px solid #4a90e2;
-    }
-    /* ===== Views Container ===== */
+
     main {
       flex-grow: 1;
-      position: relative;
-      min-height: 500px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
-    section.view {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      padding: 2rem 1rem 1rem 1rem;
-      overflow-y: auto;
-      opacity: 0;
-      pointer-events: none;
-      transform: translateY(20px);
-      transition:
-        opacity 0.4s cubic-bezier(0.4,0,0.2,1),
-        transform 0.4s cubic-bezier(0.4,0,0.2,1);
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(74,144,226,0.3) transparent;
-    }
-    section.view.active {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translateY(0);
-    }
-    /* ===== Scrollbar Styling ===== */
-    section.view::-webkit-scrollbar {
-      width: 8px;
-    }
-    section.view::-webkit-scrollbar-thumb {
-      background-color: rgba(74,144,226,0.3);
-      border-radius: 4px;
-    }
-    /* ===== Headings ===== */
-    h2 {
-      margin: 0 0 1rem 0;
-      font-weight: 700;
-      font-size: 1.6rem;
-      letter-spacing: 0.05em;
-      color: #90aaff;
-      text-transform: uppercase;
-      user-select: none;
-    }
-    h3 {
-      font-weight: 600;
-      margin: 2rem 0 0.75rem 0;
-      color: #a0b8ff;
-      user-select: none;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    /* ===== Textarea & Input ===== */
-    textarea {
+
+    iframe {
+      flex-grow: 1;
       width: 100%;
-      min-height: 120px;
-      background: rgba(15,15,23,0.6);
-      border: 1px solid rgba(74,144,226,0.6);
-      border-radius: 15px;
-      padding: 1.25rem 1rem;
-      color: #d0e0ff;
-      font-size: 1.1rem;
-      font-weight: 500;
-      resize: vertical;
-      transition:
-        background-color 0.3s ease,
-        border-color 0.3s ease,
-        box-shadow 0.3s ease;
-      font-family: 'Inter', sans-serif;
-      letter-spacing: 0.03em;
-      box-shadow:
-        inset 0 0 12px rgba(74,144,226,0.25);
-    }
-    textarea:focus {
-      outline: none;
-      border-color: #58a6ff;
-      box-shadow:
-        0 0 15px 2px #58a6ff;
-      background-color: rgba(15,15,23,0.8);
-    }
-    button.generate {
-      margin-top: 1.5rem;
-      background: #4a90e2;
       border: none;
-      padding: 1rem 1.5rem;
-      font-weight: 700;
-      color: #e1e8ff;
-      font-size: 1.2rem;
-      border-radius: 20px;
-      cursor: pointer;
-      user-select: none;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      transition:
-        background-color 0.3s ease,
-        box-shadow 0.3s ease;
-      box-shadow: 0 0 10px #4a90e2;
-      filter: drop-shadow(0 0 4px #4a90e2);
+      background: #0b0b11;
+      filter: drop-shadow(0 0 15px rgba(100,150,255,0.2));
     }
-    button.generate:hover:not(:disabled) {
-      background: #6ca0ff;
-      box-shadow:
-        0 0 15px 4px #7db0ff;
-      filter: drop-shadow(0 0 8px #7db0ff);
-    }
-    button.generate:disabled {
-      cursor: not-allowed;
-      background: #20476d;
-      box-shadow: none;
-      filter: none;
-      color: #a0a8c0;
-    }
-    /* ===== Status & Output ===== */
-    #status {
-      margin-top: 1.2rem;
-      font-weight: 600;
-      color: #80aaff;
+
+    footer {
+      padding: 0.8rem;
       text-align: center;
-      user-select: none;
+      font-size: 0.8rem;
+      color: #555;
+      background: #10101a;
+      border-top: 1px solid rgba(100,100,255,0.05);
     }
-    #output {
-      margin-top: 1.8rem;
-      border-radius: 20px;
-      background: rgba(15,15,23,0.6);
-      min-height: 320px;
-      position: relative;
-      overflow: hidden;
-      box-shadow:
-        inset 0 0 20px rgba(74,144,226,0.2);
-    }
-    #output img {
-      width: 100%;
-      height: auto;
-      display: block;
-      border-radius: 20px;
-      filter: drop-shadow(0 0 10px #4a90e2);
-      user-select: none;
-    }
-    /* ===== Spinner ===== */
-    .spinner {
-      border: 5px solid rgba(72,72,110,0.3);
-      border-top: 5px solid #4a90e2;
-      border-radius: 50%;
-      width: 56px;
-      height: 56px;
-      animation: spin 1.3s linear infinite;
-      margin: 40px auto 0;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    /* ===== Settings ===== */
-    #settings button {
-      margin-top: 1.5rem;
-      background: #4a90e2;
-      border: none;
-      padding: 0.9rem 1.2rem;
-      font-weight: 600;
-      color: #e1e8ff;
-      border-radius: 15px;
-      cursor: pointer;
-      user-select: none;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      width: 100%;
-      max-width: 360px;
-      box-shadow: 0 0 12px #4a90e2;
-      filter: drop-shadow(0 0 8px #4a90e2);
-      transition: background-color 0.3s ease;
-    }
-    #settings button:hover {
-      background: #6ca0ff;
-      box-shadow: 0 0 18px #7db0ff;
-      filter: drop-shadow(0 0 12px #7db0ff);
-    }
-    #apiKey {
-      user-select: all;
-      background: rgba(0,0,0,0.3);
-      padding: 0.6rem 0.9rem;
-      font-family: monospace;
-      font-weight: 600;
-      font-size: 1.1rem;
+
+    .glass {
+      backdrop-filter: blur(10px);
+      background: rgba(255,255,255,0.03);
       border-radius: 12px;
-      color: #a0b8ff;
-      margin-top: 0.7rem;
-      max-width: 400px;
-      word-break: break-word;
-      cursor: pointer;
-      box-shadow: inset 0 0 10px #4a90e2;
-      transition: background-color 0.3s ease;
+      box-shadow: inset 0 0 15px rgba(100,150,255,0.1);
+      padding: 0.5rem 1rem;
     }
-    #apiKey:hover {
-      background-color: rgba(74,144,226,0.3);
-    }
-    /* ===== Responsive ===== */
-    @media (max-width: 640px) {
-      #app {
-        margin: 1rem;
-        padding: 1.5rem 1.8rem;
-      }
-      header {
-        padding: 0.8rem 1.5rem;
-      }
-      nav button {
-        margin-left: 1rem;
-        font-size: 0.9rem;
-        padding: 0.4rem 0.8rem;
-      }
-      button.generate {
-        font-size: 1rem;
-        padding: 0.9rem 1.2rem;
-      }
-      #apiKey {
+
+    @media (max-width: 600px) {
+      header h1 {
         font-size: 1rem;
       }
     }
@@ -312,173 +76,14 @@
 </head>
 <body>
   <header>
-    <h1>ULTIMAGE AI</h1>
-    <nav>
-      <button id="btn-gen" class="active" aria-current="page" aria-label="Generator" onclick="switchView('generator', this)">GENERATE</button>
-      <button id="btn-settings" aria-label="Settings" onclick="switchView('settings', this)">SETTINGS</button>
-    </nav>
+    <h1>Ultimage AI Generator</h1>
+    <div class="glass">Powered by Perchance</div>
   </header>
-
-  <div id="app" role="main">
-    <!-- Generator View -->
-    <section id="generator" class="view active" aria-label="AI Image Generator">
-      <textarea id="promptInput" aria-label="Enter image prompt" placeholder="Enter your image prompt..." rows="6" spellcheck="false"></textarea>
-      <button class="generate" id="generateBtn" onclick="generateImage()">Generate Image</button>
-      <div id="status" role="alert" aria-live="polite"></div>
-      <div id="output" aria-live="polite" aria-atomic="true"></div>
-    </section>
-
-    <!-- Settings View -->
-    <section id="settings" class="view" aria-label="Settings">
-      <h2>Settings</h2>
-      <button onclick="toggleTheme()" aria-label="Toggle light or dark theme">Toggle Light / Dark Theme</button>
-      <h3>Your API Key</h3>
-      <p id="apiKey" title="Click to copy your API key" tabindex="0" role="textbox" aria-readonly="true" onclick="copyAPIKey()" onkeydown="if(event.key==='Enter'||event.key===' ')copyAPIKey()"></p>
-      <button onclick="generateAPIKey()" aria-label="Generate new API key">Generate API Key</button>
-      <h3>Clear Data</h3>
-      <button onclick="clearData()" aria-label="Clear all saved data">Clear all saved data</button>
-    </section>
-  </div>
-
-  <iframe id="perchance" src="https://perchance.org/ai-text-to-image-generator" title="AI Generator iframe" aria-hidden="true" style="display:none;"></iframe>
-
-  <script>
-    // Elements
-    const views = {
-      generator: document.getElementById('generator'),
-      settings: document.getElementById('settings'),
-    };
-    const navButtons = {
-      generator: document.getElementById('btn-gen'),
-      settings: document.getElementById('btn-settings'),
-    };
-    const promptInput = document.getElementById('promptInput');
-    const generateBtn = document.getElementById('generateBtn');
-    const output = document.getElementById('output');
-    const status = document.getElementById('status');
-    const apiKeyElem = document.getElementById('apiKey');
-    const iframe = document.getElementById('perchance');
-
-    // Storage keys
-    const STORAGE_PROMPTS = 'ultimage_prompts';
-    const STORAGE_API_KEY = 'ultimage_api_key';
-    const STORAGE_THEME = 'ultimage_theme';
-
-    // Switch views with animations
-    function switchView(viewName, btn) {
-      Object.values(views).forEach(v => v.classList.remove('active'));
-      views[viewName].classList.add('active');
-      Object.values(navButtons).forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      btn.setAttribute('aria-current', 'page');
-      // Clear status & output on switching
-      if(viewName === 'generator') {
-        status.textContent = '';
-        output.innerHTML = '';
-      }
-    }
-
-    // Load saved theme
-    if(localStorage.getItem(STORAGE_THEME) === 'light') {
-      document.body.classList.add('light');
-    }
-
-    // Load or create API key
-    function loadAPIKey() {
-      let key = localStorage.getItem(STORAGE_API_KEY);
-      if(!key) {
-        key = generateAPIKey(true);
-      } else {
-        apiKeyElem.textContent = key;
-      }
-      return key;
-    }
-    loadAPIKey();
-
-    // Generate and save API key
-    function generateAPIKey(auto = false) {
-      const key = 'IMG-' + Math.random().toString(36).slice(2,14).toUpperCase();
-      localStorage.setItem(STORAGE_API_KEY, key);
-      apiKeyElem.textContent = key;
-      if(!auto) alert('API Key generated and saved!');
-      return key;
-    }
-
-    // Copy API key to clipboard
-    function copyAPIKey() {
-      const key = localStorage.getItem(STORAGE_API_KEY);
-      if(!key) return;
-      navigator.clipboard.writeText(key);
-      alert('API key copied to clipboard!');
-    }
-
-    // Toggle theme
-    function toggleTheme() {
-      document.body.classList.toggle('light');
-      if(document.body.classList.contains('light')) {
-        localStorage.setItem(STORAGE_THEME, 'light');
-      } else {
-        localStorage.removeItem(STORAGE_THEME);
-      }
-    }
-
-    // Clear saved data
-    function clearData() {
-      if(confirm('Clear all saved prompts, API key and settings?')) {
-        localStorage.removeItem(STORAGE_PROMPTS);
-        localStorage.removeItem(STORAGE_API_KEY);
-        localStorage.removeItem(STORAGE_THEME);
-        apiKeyElem.textContent = '';
-        output.innerHTML = '';
-        promptInput.value = '';
-        alert('Data cleared. Reload page to reset.');
-      }
-    }
-
-    // Save prompt to localStorage (optional for future use)
-    function savePrompt(prompt) {
-      let arr = JSON.parse(localStorage.getItem(STORAGE_PROMPTS) || '[]');
-      arr.unshift({ prompt, date: new Date().toISOString() });
-      if(arr.length > 30) arr.pop();
-      localStorage.setItem(STORAGE_PROMPTS, JSON.stringify(arr));
-    }
-
-    // Generate image using Perchance iframe
-    async function generateImage() {
-      const prompt = promptInput.value.trim();
-      if(!prompt) {
-        alert('Please enter a prompt.');
-        return;
-      }
-      generateBtn.disabled = true;
-      status.innerHTML = '<div class="spinner"></div><p>Generating image...</p>';
-      output.innerHTML = '';
-
-      // Send prompt to Perchance iframe
-      iframe.contentWindow.postMessage({ prompt }, '*');
-
-      // Listen for message from iframe
-      function receiveMessage(event) {
-        if(event.source !== iframe.contentWindow) return;
-        if(event.data && event.data.imageUrl) {
-          output.innerHTML = `<img src="${event.data.imageUrl}" alt="Generated AI Image" />`;
-          status.textContent = '';
-          generateBtn.disabled = false;
-          savePrompt(prompt);
-          window.removeEventListener('message', receiveMessage);
-        }
-      }
-      window.addEventListener('message', receiveMessage);
-
-      // Fallback timeout
-      setTimeout(() => {
-        if(generateBtn.disabled) {
-          status.textContent = 'Image generation timed out. Please try again.';
-          generateBtn.disabled = false;
-          window.removeEventListener('message', receiveMessage);
-        }
-      }, 20000);
-    }
-  </script>
+  <main>
+    <iframe src="https://perchance.org/ai-text-to-image-generator"></iframe>
+  </main>
+  <footer>
+    &copy; 2025 Ultimage | AI powered by <a href="https://perchance.org/" target="_blank" style="color:#7bb0ff;">Perchance</a>
+  </footer>
 </body>
 </html>
