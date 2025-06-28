@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ultimage AI Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f0c29;
+      color: white;
+      transition: background 0.3s, color 0.3s;
+    }
+    .light {
+      background: #f5f5f5;
+      color: #111;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      padding: 2rem;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    input, button {
+      padding: 10px;
+      border: none;
+      margin: 0.3rem 0;
+      width: 100%;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+    #output img {
+      width: 100%;
+      max-height: 400px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-top: 1rem;
+    }
+    #settings {
+      display: none;
+      margin-top: 1rem;
+      background: rgba(255,255,255,0.05);
+      padding: 1rem;
+      border-radius: 10px;
+    }
+    ul { list-style: none; padding: 0; }
+    li { margin: 4px 0; }
+    .hidden { display: none; }
+    .prompt-history {
+      background: rgba(255,255,255,0.03);
+      padding: 0.5rem;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Ultimage AI Generator</h1>
+
+    <div id="loginArea">
+      <input id="loginUser" placeholder="Username">
+      <input id="loginPass" type="password" placeholder="Password">
+      <button onclick="login()">Login / Signup</button>
+    </div>
+
+    <div id="mainArea" class="hidden">
+      <input id="promptInput" placeholder="Enter your prompt...">
+      <button onclick="generateImage()">Generate Image</button>
+      <div id="output"></div>
+
+      <h3>Prompt History</h3>
+      <div class="prompt-history">
+        <ul id="history"></ul>
+      </div>
+
+      <h3>Settings</h3>
+      <button onclick="toggleSettings()">Toggle Settings</button>
+      <div id="settings">
+        <button onclick="toggleTheme()">Toggle Light/Dark</button><br>
+        <button onclick="clearHistory()">Clear History</button><br>
+        <button onclick="generateAPI()">Generate API Key</button>
+        <p id="apiDisplay"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden Perchance AI iframe -->
+  <iframe id="perchanceFrame" src="https://perchance.org/ai-text-to-image-generator" style="width:0;height:0;border:none;"></iframe>
+
+  <script>
+    let theme = 'dark';
+    let currentUser = null;
+    const historyKey = 'ultimage-history';
+
+    function login() {
+      const user = document.getElementById('loginUser').value.trim();
+      const pass = document.getElementById('loginPass').value;
+      if (!user || !pass) return alert('Enter both username and password.');
+      currentUser = user;
+      document.getElementById('loginArea').style.display = 'none';
+      document.getElementById('mainArea').classList.remove('hidden');
+      loadHistory();
+      loadAPI();
+    }
+
+    function generateImage() {
+      const prompt = document.getElementById('promptInput').value.trim();
+      if (!prompt) return;
+      const frame = document.getElementById('perchanceFrame').contentWindow;
+      frame.postMessage({ prompt }, "*");
+      savePrompt(prompt);
+      updateHistoryUI(prompt);
+      const imgURL = `https://api.dicebear.com/8.x/shapes/svg?seed=${encodeURIComponent(prompt)}`;
+      document.getElementById("output").innerHTML = `<img src="${imgURL}" alt="Generated Image">`;
+    }
+
+    function savePrompt(prompt) {
+      let data = JSON.parse(localStorage.getItem(historyKey) || "{}");
+      if (!data[currentUser]) data[currentUser] = [];
+      data[currentUser].push(prompt);
+      localStorage.setItem(historyKey, JSON.stringify(data));
+    }
+
+    function updateHistoryUI(prompt) {
+      const li = document.createElement("li");
+      li.textContent = prompt;
+      document.getElementById("history").appendChild(li);
+    }
+
+    function loadHistory() {
+      const ul = document.getElementById("history");
+      ul.innerHTML = "";
+      const data = JSON.parse(localStorage.getItem(historyKey) || "{}");
+      (data[currentUser] || []).forEach(p => updateHistoryUI(p));
+    }
+
+    function toggleSettings() {
+      const el = document.getElementById("settings");
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      body.classList.toggle('light');
+      theme = body.classList.contains('light') ? 'light' : 'dark';
+    }
+
+    function clearHistory() {
+      localStorage.removeItem(historyKey);
+      document.getElementById("history").innerHTML = "";
+    }
+
+    function generateAPI() {
+      const key = 'IMG-' + Math.random().toString(36).substring(2, 14).toUpperCase();
+      localStorage.setItem("ultimage-api-" + currentUser, key);
+      document.getElementById("apiDisplay").textContent = "API Key: " + key;
+    }
+
+    function loadAPI() {
+      const key = localStorage.getItem("ultimage-api-" + currentUser);
+      if (key) {
+        document.getElementById("apiDisplay").textContent = "API Key: " + key;
+      }
+    }
+  </script>
+</body>
+</html>
